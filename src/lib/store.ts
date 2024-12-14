@@ -108,6 +108,8 @@ export const useStore = create<State & Actions>()(
 					state.labels[id] = name;
 				}
 
+				value = isNaN(value) ? 0 : value;
+
 				if (!exist) {
 					state.nodes.push({
 						id,
@@ -155,15 +157,15 @@ export const useStore = create<State & Actions>()(
 
 				state.revenuesValue = Math.max(state.links
 					.filter((link) => link.target === ids.REVENUES)
-					.reduce((acc, cur) => acc + cur.value, 0), 0);
+					.reduce((acc, cur) => acc + (cur.value ?? 0), 0), 0);
 
 				state.needsValue = Math.max(state.links
 					.filter((link) => link.source === ids.NEEDS)
-					.reduce((acc, cur) => acc + cur.value, 0), 0);
+					.reduce((acc, cur) => acc + (cur.value ?? 0), 0), 0);
 
 				state.wantsValue = Math.max(state.links
 					.filter((link) => link.source === ids.WANTS)
-					.reduce((acc, cur) => acc + cur.value, 0), 0);
+					.reduce((acc, cur) => acc + (cur.value ?? 0), 0), 0);
 
 				state.savingValue = Math.max(state.revenuesValue - state.needsValue - state.wantsValue, 0);
 
@@ -212,7 +214,15 @@ export const useStore = create<State & Actions>()(
 			});
 		},
 		importData: (data) => {
-			set(() => data);
+			set((state) => {
+				state.labels = data.labels;
+				state.savingValue = data.savingValue;
+				state.needsValue = data.needsValue;
+				state.wantsValue = data.wantsValue;
+				state.revenuesValue = data.revenuesValue;
+				state.nodes = data.nodes;
+				state.links = data.links;
+			});
 		}
 	}))
 );

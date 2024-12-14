@@ -25,7 +25,7 @@ export default function AmountInput({id, type, defaultText, defaultValue}: {
 		<div className="relative w-full">
 			<Input id="input-13" className={cn('peer', type === 'SAVINGS' ? 'ps-7 pe-28' : 'ps-6 pe-12')}
 				   placeholder="0.00"
-				   type="number" value={value}
+				   type="number" value={value} onFocus={(e) => e.target.select()}
 				   onChange={(e) => setValue(parseFloat(e.target.value))}/>
 			<span
 				className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-sm text-muted-foreground peer-disabled:opacity-50">

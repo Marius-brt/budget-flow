@@ -1,4 +1,3 @@
-// Dependencies: pnpm install lucide-react
 'use client';
 
 import {Toggle} from '@/components/ui/toggle';
@@ -10,7 +9,7 @@ export default function ThemeButton() {
 
 	return <Toggle
 		className="group size-9"
-		pressed={theme === 'dark'}
+		pressed={theme !== 'dark'}
 		onPressedChange={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
 		aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
 	>

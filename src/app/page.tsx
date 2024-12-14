@@ -8,7 +8,9 @@ import {useMemo} from 'react';
 import {numberParser} from '@/lib/utils';
 import {Button} from '@/components/ui/button';
 import {Download, Upload} from 'lucide-react';
-import ThemeButton from '@/components/buttons/theme-button';
+import dynamic from 'next/dynamic';
+
+const ThemeButton = dynamic(() => import('@/components/buttons/theme-button'), {ssr: false});
 
 export default function Home() {
 	const {nodes, links, labels, revenuesValue, savingValue, needsValue, wantsValue, importData} = useStore();
