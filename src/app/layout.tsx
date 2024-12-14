@@ -4,6 +4,7 @@ import {type Metadata, Viewport} from 'next';
 import {Inter as FontSans, JetBrains_Mono as FontMono} from 'next/font/google';
 
 import {ThemeProvider} from '@/providers/theme-provider';
+import Script from 'next/script';
 
 const fontSans = FontSans({
 	subsets: ['latin'],
@@ -35,6 +36,8 @@ export default function RootLayout({
 		<body
 			className={`${fontSans.variable} ${fontMono.variable} bg-background font-sans antialiased`}
 		>
+		<Script defer data-domain="investment.mariusbrt.com"
+				src="https://plausible.mariusbrt.com/js/script.outbound-links.js"/>
 		<ThemeProvider
 			attribute="class"
 			defaultTheme="system"
