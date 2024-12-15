@@ -14,6 +14,7 @@ import {checkData} from '@/lib/schema';
 import {useTheme} from 'next-themes';
 import Link from 'next/link';
 import Banner from '@/components/banners/banner';
+import {Table} from '@/components/table';
 
 const ThemeButton = dynamic(() => import('@/components/buttons/theme-button'), {ssr: false});
 
@@ -116,7 +117,7 @@ export default function Home() {
 			savings.
 		</p>
 
-		{(revenuesTotal > 0) &&
+		{revenuesTotal > 0 && <>
             <div className={'h-[50vh] w-full'}>
                 <ResponsiveSankey
                     data={data}
@@ -172,6 +173,8 @@ export default function Home() {
 						]
 					}}
                 />
-            </div>}
+            </div>
+            <Table/>
+        </>}
 	</>;
 }

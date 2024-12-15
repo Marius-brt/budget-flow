@@ -37,11 +37,6 @@ function SavingInput({path, id}: { path: string, id: string }) {
 			<span className={'shrink-0 truncate max-w-[40%]'}>{labels[id]} ({node.percent}%)</span>
 			<div className={'flex w-full justify-end'}>
 				<div className={'flex gap-2 items-center'} onClick={(e) => e.stopPropagation()}>
-					<Button onClick={() => addSaving('New saving', path)} variant={'outline'}
-							className={'flex gap-2 items-center'}>
-						<PlusIcon size={16}/>
-						Add sub-category
-					</Button>
 					<Button variant={'destructive'} size={'icon'} className={'flex gap-2 items-center'}
 							onClick={() => deleteSaving(path)}>
 						<Trash2Icon size={16}/>
@@ -69,16 +64,13 @@ function SavingInput({path, id}: { path: string, id: string }) {
 						</span>
 					</div>
 				</div>
-				{/*<div className={'flex gap-2 w-full'}>
-					<AddButton onClick={() => addSaving('New saving', path)} text={'Add subcategory'}/>
-					<Button variant={'destructive'} className={'flex gap-2 items-center'}
-							onClick={() => deleteSaving(path)}>
-						<Trash2Icon size={16}/>
-						Delete category
-					</Button>
-				</div>*/}
+				<Button onClick={() => addSaving('New saving', path)} variant={'outline'}
+						className={'flex gap-2 items-center w-full'}>
+					<PlusIcon size={16}/>
+					Add sub-category
+				</Button>
 				{(totalSubCategoriesPercent !== 100 && Object.keys(node.subCategories).length > 0) && <Banner
-                    text={totalSubCategoriesPercent > 100 ? 'You are using more than 100% of the category' : 'You are using less than 100% of the category'}/>}
+                    text={totalSubCategoriesPercent > 100 ? 'You are using more than 100% of the category' : `You have ${100 - totalSubCategoriesPercent}% left to use for this category`}/>}
 				<Accordion type="single" collapsible className="w-full space-y-2" defaultValue="3">
 					{Object.keys(node.subCategories).map((id) => <SavingInput key={id}
 																			  path={`${path}.subCategories.${id}`}
@@ -99,7 +91,7 @@ export function SavingForm() {
 
 	return <div className={'flex flex-col gap-3 p-4 border bg-card text-card-foreground rounded-lg'}>
 		{totalPercent !== 100 && <Banner
-            text={totalPercent > 100 ? 'You are using more than 100% of your budget' : 'You are using less than 100% of your budget'}/>}
+            text={totalPercent > 100 ? 'You are using more than 100% of your budget' : `You have ${100 - totalPercent}% left to use`}/>}
 		<Accordion type="single" collapsible className="w-full space-y-2" defaultValue="3">
 			{Object.keys(nodes).map((id) => <SavingInput key={id} id={id} path={id}/>)}
 		</Accordion>
