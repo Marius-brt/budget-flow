@@ -1,242 +1,160 @@
-import {create} from 'zustand';
+import {create} from 'zustand/index';
 import {immer} from 'zustand/middleware/immer';
+import {z} from 'zod';
+import {convertToSankey, dataSchema, importSchema, SankeyDataType} from '@/lib/schema';
+import {set as _set, unset as _unset} from 'lodash-es';
+
+export type NodeIdExclude = 'needs' | 'wants' | 'revenues';
 
 type State = {
 	labels: Record<string, string>,
-	savingValue: number,
-	needsValue: number,
-	wantsValue: number,
-	revenuesValue: number,
-	nodes: {
-		id: string,
-		nodeColor: string,
-		type: ParentType,
-		isNode?: boolean,
-	}[],
-	links: {
-		source: string,
-		target: string,
-		value: number,
-		percent?: number
-	}[]
+	rawData: z.infer<typeof dataSchema>
+	data: SankeyDataType,
+	revenuesTotal: number,
+	needsTotal: number,
+	wantsTotal: number,
+	savingTotal: number
 }
 
 type Actions = {
-	setNode: (id: string, name: string, value: number, type: ParentType) => void,
-	removeNode: (id: string) => void,
-	getNodeValue: (id: string) => number,
-	updateLinkValue: (source: string, target: string, value: number) => void,
-	importData: (data: State) => void
+	updateLabel: (id: string, label: string) => void,
+	updateData: (type: NodeIdExclude, id: string, value: number) => void
+	updateSaving: (path: string, percent: number) => void,
+	addNode: (label: string, type: NodeIdExclude) => void,
+	addSaving: (label: string, path?: string) => void,
+	removeNode: (id: string, type: NodeIdExclude) => void,
+	deleteSaving: (path: string) => void,
+	importData: (data: z.infer<typeof importSchema>) => void
 }
 
-export type ParentType = 'SAVINGS' | 'NEEDS' | 'WANTS' | 'REVENUES';
-
-const ids: Record<ParentType, string> = {
-	SAVINGS: 'saving',
-	NEEDS: 'needs',
-	WANTS: 'wants',
-	REVENUES: 'revenues'
-};
-
-const colors: Record<ParentType, string> = {
-	SAVINGS: 'blue',
-	NEEDS: 'red',
-	WANTS: 'yellow',
-	REVENUES: 'green'
-};
-
-const initialState: State = {
+const defaultState: State = {
 	labels: {
-		saving: 'Savings',
+		savings: 'Savings',
 		needs: 'Needs',
 		wants: 'Wants',
 		revenues: 'Revenues'
 	},
-	savingValue: 0,
-	needsValue: 0,
-	wantsValue: 0,
-	revenuesValue: 0,
-	nodes: [
-		{
-			id: ids.REVENUES,
-			nodeColor: 'green',
-			type: 'REVENUES'
-		},
-		{
-			id: ids.NEEDS,
-			nodeColor: 'red',
-			type: 'NEEDS'
-		},
-		{
-			id: ids.WANTS,
-			nodeColor: 'yellow',
-			type: 'WANTS'
-		},
-		{
-			id: ids.SAVINGS,
-			nodeColor: 'blue',
-			type: 'SAVINGS'
-		}
-	],
-	links: [
-		{
-			source: ids.REVENUES,
-			target: ids.NEEDS,
-			value: 0
-		},
-		{
-			source: ids.REVENUES,
-			target: ids.WANTS,
-			value: 0
-		},
-		{
-			source: ids.REVENUES,
-			target: ids.SAVINGS,
-			value: 0
-		}
-	]
+	rawData: {
+		needs: {},
+		wants: {},
+		revenues: {},
+		savings: {}
+	},
+	revenuesTotal: 0,
+	needsTotal: 0,
+	wantsTotal: 0,
+	savingTotal: 0,
+	data: convertToSankey({
+		needs: {},
+		wants: {},
+		revenues: {},
+		savings: {}
+	}).data
 };
 
 export const useStore = create<State & Actions>()(
 	immer((set) => ({
-		...initialState,
-		setNode: (id, name, value, type) => {
+		...defaultState,
+		updateLabel: (id, label) => {
 			set((state) => {
-				const exist = state.nodes.find((node) => node.id === id);
-
-				if (state.labels[id] !== name) {
-					state.labels[id] = name;
-				}
-
-				value = isNaN(value) ? 0 : value;
-
-				if (!exist) {
-					state.nodes.push({
-						id,
-						nodeColor: colors[type],
-						type,
-						isNode: true
-					});
-					if (type === 'REVENUES') {
-						state.links.push({
-							source: id,
-							target: ids.REVENUES,
-							value
-						});
-					} else if (type !== 'SAVINGS') {
-						state.links.push({
-							source: ids[type],
-							target: id,
-							value
-						});
-					} else {
-						console.log('SAVING', {
-							source: ids.SAVINGS,
-							target: id,
-							value: 0,
-							percent: value
-						});
-						state.links.push({
-							source: ids.SAVINGS,
-							target: id,
-							value: 0,
-							percent: value
-						});
-					}
-				} else if (type !== 'SAVINGS') {
-					state.links = state.links.map((link) => {
-						if (type === 'REVENUES' && link.source === id) {
-							link.value = value;
-						}
-						if (type !== 'REVENUES' && link.target === id) {
-							link.value = value;
-						}
-						return link;
-					});
-				}
-
-				state.revenuesValue = Math.max(state.links
-					.filter((link) => link.target === ids.REVENUES)
-					.reduce((acc, cur) => acc + (cur.value ?? 0), 0), 0);
-
-				state.needsValue = Math.max(state.links
-					.filter((link) => link.source === ids.NEEDS)
-					.reduce((acc, cur) => acc + (cur.value ?? 0), 0), 0);
-
-				state.wantsValue = Math.max(state.links
-					.filter((link) => link.source === ids.WANTS)
-					.reduce((acc, cur) => acc + (cur.value ?? 0), 0), 0);
-
-				state.savingValue = Math.max(state.revenuesValue - state.needsValue - state.wantsValue, 0);
-
-				state.links = state.links.map((link) => {
-					if (link.source === ids.REVENUES) {
-						switch (link.target) {
-							case ids.NEEDS:
-								link.value = state.needsValue;
-								break;
-							case ids.WANTS:
-								link.value = state.wantsValue;
-								break;
-							case ids.SAVINGS:
-								link.value = state.savingValue;
-								break;
-						}
-					} else if (link.source === ids.SAVINGS) {
-						if (link.target === id) {
-							link.percent = value;
-						}
-						link.value = state.savingValue * (link.percent ?? 0) / 100;
-					}
-					return link;
-				});
+				state.labels[id] = label;
 			});
 		},
-		removeNode: (id) => {
+		updateData: (type, id, value) => {
 			set((state) => {
-				state.nodes = state.nodes.filter((node) => node.id !== id);
-				state.links = state.links.filter((link) => link.source !== id && link.target !== id);
+				state.rawData[type][id] = value;
+
+				const data = convertToSankey(state.rawData);
+				state.savingTotal = data.savingTotal;
+				state.revenuesTotal = data.revenuesTotal;
+				state.needsTotal = data.needsTotal;
+				state.wantsTotal = data.wantsTotal;
+				state.data = data.data;
+			});
+		},
+		updateSaving: (path, percent) => {
+			set((state) => {
+				percent = Math.max(isNaN(percent) ? 0 : percent, 0);
+				_set(state.rawData.savings, path + '.percent', percent);
+
+				const data = convertToSankey(state.rawData);
+				state.savingTotal = data.savingTotal;
+				state.revenuesTotal = data.revenuesTotal;
+				state.needsTotal = data.needsTotal;
+				state.wantsTotal = data.wantsTotal;
+				state.data = data.data;
+			});
+		},
+		addNode: (label, type) => {
+			set((state) => {
+				const id = Date.now().toString();
+				state.rawData[type][id] = 0;
+				state.labels[id] = label;
+			});
+		},
+		addSaving: (label, path) => {
+			set((state) => {
+				const id = Date.now().toString();
+				if (path) {
+					_set(state.rawData.savings, path + '.subCategories.' + id, {
+						percent: 0,
+						subCategories: {}
+					});
+				} else {
+					state.rawData.savings[id] = {
+						percent: 0,
+						subCategories: {}
+					};
+				}
+				state.labels[id] = label;
+			});
+		},
+		removeNode: (id, type) => {
+			set((state) => {
+				delete state.rawData[type][id];
 				delete state.labels[id];
+
+				const data = convertToSankey(state.rawData);
+				state.savingTotal = data.savingTotal;
+				state.revenuesTotal = data.revenuesTotal;
+				state.needsTotal = data.needsTotal;
+				state.wantsTotal = data.wantsTotal;
+				state.data = data.data;
 			});
 		},
-		getNodeValue: (id): number => {
-			const link = useStore.getState().links.find((link) => link.target === id || link.source === id);
-			return link?.percent !== undefined ? link.percent : link?.value ?? 0;
-		},
-		updateLinkValue: (source, target, value) => {
+		deleteSaving: (path) => {
 			set((state) => {
-				state.links = state.links.map((link) => {
-					if (link.source === source && link.target === target) {
-						link.value = value;
-					}
-					return link;
-				});
+				_unset(state.rawData.savings, path);
+
+				const data = convertToSankey(state.rawData);
+				state.savingTotal = data.savingTotal;
+				state.revenuesTotal = data.revenuesTotal;
+				state.needsTotal = data.needsTotal;
+				state.wantsTotal = data.wantsTotal;
+				state.data = data.data;
 			});
 		},
-		importData: (data) => {
+		importData: (dt) => {
 			set((state) => {
-				state.labels = data.labels;
-				state.savingValue = data.savingValue;
-				state.needsValue = data.needsValue;
-				state.wantsValue = data.wantsValue;
-				state.revenuesValue = data.revenuesValue;
-				state.nodes = data.nodes;
-				state.links = data.links;
+				state.labels = dt.labels;
+				state.rawData = dt.rawData;
+
+				const data = convertToSankey(dt.rawData);
+				state.savingTotal = data.savingTotal;
+				state.revenuesTotal = data.revenuesTotal;
+				state.needsTotal = data.needsTotal;
+				state.wantsTotal = data.wantsTotal;
+				state.data = data.data;
 			});
 		}
 	}))
 );
 
 export function generateJSON() {
-	const {nodes, links, labels, savingValue, needsValue, wantsValue, revenuesValue} = useStore.getState();
+	const {labels, rawData} = useStore.getState();
 	const data = JSON.stringify({
-		nodes,
-		links,
 		labels,
-		savingValue,
-		needsValue,
-		wantsValue,
-		revenuesValue
+		rawData
 	});
 	const blob = new Blob([data], {type: 'application/json'});
 	const url = URL.createObjectURL(blob);

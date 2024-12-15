@@ -1,22 +1,27 @@
 'use client';
 
-import {ResponsiveSankey} from '@nivo/sankey';
 import {RevenueForm} from '@/components/forms/revenue-form';
-import {generateJSON, useStore} from '@/lib/store';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {useMemo} from 'react';
-import {numberParser} from '@/lib/utils';
 import {Button} from '@/components/ui/button';
 import {Download, Upload} from 'lucide-react';
 import dynamic from 'next/dynamic';
+import {generateJSON, useStore} from '@/lib/store';
+import {useMemo} from 'react';
+import {ResponsiveSankey} from '@nivo/sankey';
+import {errorToast, numberParser} from '@/lib/utils';
+import {SavingForm} from '@/components/forms/savings-form';
+import {checkData} from '@/lib/schema';
+import {useTheme} from 'next-themes';
+import Link from 'next/link';
+import Banner from '@/components/banners/banner';
 
 const ThemeButton = dynamic(() => import('@/components/buttons/theme-button'), {ssr: false});
 
 export default function Home() {
-	const {nodes, links, labels, revenuesValue, savingValue, needsValue, wantsValue, importData} = useStore();
+	const {importData, data, labels, revenuesTotal, wantsTotal, needsTotal, savingTotal} = useStore();
 
 	const percentages = useMemo(() => {
-		if (revenuesValue === 0) {
+		if (revenuesTotal === 0) {
 			return {
 				needs: 0,
 				wants: 0,
@@ -24,25 +29,29 @@ export default function Home() {
 			};
 		}
 		const v = {
-			needs: Math.round(needsValue / revenuesValue * 100),
-			wants: Math.round(wantsValue / revenuesValue * 100),
-			savings: Math.round(savingValue / revenuesValue * 100)
+			needs: Math.round(needsTotal / revenuesTotal * 100),
+			wants: Math.round(wantsTotal / revenuesTotal * 100),
+			savings: Math.round(savingTotal / revenuesTotal * 100)
 		};
 		return {
 			needs: isNaN(v.needs) ? 0 : v.needs,
 			wants: isNaN(v.wants) ? 0 : v.wants,
 			savings: isNaN(v.savings) ? 0 : v.savings
 		};
-	}, [revenuesValue, savingValue, needsValue, wantsValue]);
+	}, [revenuesTotal, needsTotal, wantsTotal, savingTotal]);
 
-	const total = useMemo(() => needsValue + wantsValue + savingValue, [needsValue, wantsValue, savingValue]);
+	const {theme} = useTheme();
+	const total = useMemo(() => needsTotal + wantsTotal + savingTotal, [needsTotal, wantsTotal, savingTotal]);
 
 	return <>
 		<div className={'flex justify-between gap-4 max-md:flex-col'}>
 			<div className={'flex flex-col'}>
-				<h1 className={'text-2xl font-bold'}>Investment tool</h1>
-				<p className={'text-muted-foreground'}>Add your revenues and expenses to see how you spend your
-					money.</p>
+				<h1 className={'text-2xl font-bold'}>Saving calculator</h1>
+				<p className={'text-muted-foreground'}>
+					Easily calculate your savings, needs, and wants. Made by <Link href={'https://mariusbrt.com'}
+																				   className={'underline font-semibold'}>Marius
+					Brouty</Link>.
+				</p>
 			</div>
 			<div className={'flex gap-2'}>
 				<Button variant={'ghost'} onClick={generateJSON} className={'flex items-center gap-2'}><Download
@@ -58,20 +67,25 @@ export default function Home() {
 							const reader = new FileReader();
 							reader.onload = (event) => {
 								if (event.target) {
-									importData(JSON.parse(event.target.result as string));
-									e.target.value = '';
+									const data = JSON.parse(event.target.result as string);
+									if (checkData(data)) {
+										importData(data);
+										e.target.value = '';
+									} else {
+										errorToast('File is not valid');
+									}
 								}
 							};
 							reader.readAsText(e.target.files[0]);
 						}
 					} catch (e) {
-						console.error(e);
+						errorToast('Failed to import data');
 					}
 				}}/>
 			</div>
 		</div>
 
-		<Tabs defaultValue="revenue" className="w-full">
+		<Tabs defaultValue="revenue" className="w-full mt-4">
 			<TabsList className="w-full flex gap-2">
 				<TabsTrigger value="revenue" className={'w-full'}>Revenues</TabsTrigger>
 				<TabsTrigger value="needs" className={'w-full'}>Needs</TabsTrigger>
@@ -79,36 +93,34 @@ export default function Home() {
 				<TabsTrigger value="savings" className={'w-full'}>Savings</TabsTrigger>
 			</TabsList>
 			<TabsContent value="revenue">
-				<RevenueForm type={'REVENUES'}/>
+				<RevenueForm type={'revenues'}/>
 			</TabsContent>
 			<TabsContent value="needs">
-				<RevenueForm type={'NEEDS'}/>
+				<RevenueForm type={'needs'}/>
 			</TabsContent>
 			<TabsContent value="wants">
-				<RevenueForm type={'WANTS'}/>
+				<RevenueForm type={'wants'}/>
 			</TabsContent>
 			<TabsContent value="savings">
-				<RevenueForm type={'SAVINGS'}/>
+				<SavingForm/>
 			</TabsContent>
 		</Tabs>
 
-		<p>Your revenues are <span className={'font-semibold'}>{numberParser(revenuesValue)}€</span>. You spend <span
-			className={'font-semibold'}>{numberParser(needsValue)}€</span> ({percentages.needs}%) on your needs, <span
-			className={'font-semibold'}>{numberParser(wantsValue)}€</span> ({percentages.wants}%) on your wants,
-			and <span className={'font-semibold'}>{numberParser(savingValue)}€</span> ({percentages.savings}%) on your
+		{revenuesTotal > 0 && total > revenuesTotal && <Banner
+            text={`You spend more than you earn (${numberParser(revenuesTotal - total)}€)`}/>}
+
+		<p>Your revenues are <span className={'font-semibold'}>{numberParser(revenuesTotal)}€</span>. You spend <span
+			className={'font-semibold'}>{numberParser(needsTotal)}€</span> ({percentages.needs}%) on your needs, <span
+			className={'font-semibold'}>{numberParser(wantsTotal)}€</span> ({percentages.wants}%) on your wants,
+			and <span className={'font-semibold'}>{numberParser(savingTotal)}€</span> ({percentages.savings}%) on your
 			savings.
-			{revenuesValue > 0 && total > revenuesValue && <> You spend more than you earn <span
-                className="font-semibold">({numberParser(revenuesValue - total)}€)</span>.</>}
 		</p>
 
-		{(nodes.length > 4 && revenuesValue > 0) &&
+		{(revenuesTotal > 0) &&
             <div className={'h-[50vh] w-full'}>
                 <ResponsiveSankey
-                    data={{
-						nodes,
-						links
-					}}
-                    margin={{top: 0, right: 0, bottom: 0, left: 0}}
+                    data={data}
+                    margin={{top: 10, right: 0, bottom: 10, left: 0}}
                     sort="auto"
                     colors={{scheme: 'category10'}}
                     nodeOpacity={1}
@@ -127,20 +139,35 @@ export default function Home() {
 					}}
                     nodeBorderRadius={3}
                     enableLinkGradient
-                    linkOpacity={0.4}
+                    linkOpacity={0.3}
                     linkHoverOthersOpacity={0.1}
                     linkContract={3}
                     linkBlendMode="normal"
                     labelPosition="inside"
                     labelOrientation="horizontal"
                     labelPadding={16}
+                    linkTooltip={({link}) => <div
+						className={'border bg-card text-card-foreground rounded-lg py-2 px-4 shadow-lg'}>
+						<p>{labels[link.source.id]} → {labels[link.target.id]}</p>
+						<p className={'text-sm text-muted-foreground'}>{numberParser(link.value)}€</p>
+					</div>}
+                    nodeTooltip={({node}) => <div
+						className={'border bg-card text-card-foreground rounded-lg py-2 px-4 shadow-lg min-w-[150px]'}>
+						<p>{labels[node.id]}</p>
+						<p className={'text-sm text-muted-foreground'}>{numberParser(node.value)}€</p>
+					</div>}
                     label={(node) => labels[node.id]}
                     labelTextColor={{
 						from: 'color',
-						modifiers: [
+						modifiers: theme === 'light' ? [
 							[
 								'darker',
-								1
+								0.8
+							]
+						] : [
+							[
+								'brighter',
+								0.8
 							]
 						]
 					}}

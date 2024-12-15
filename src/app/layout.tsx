@@ -5,6 +5,7 @@ import {Inter as FontSans, JetBrains_Mono as FontMono} from 'next/font/google';
 
 import {ThemeProvider} from '@/providers/theme-provider';
 import Script from 'next/script';
+import {Toaster} from '@/components/ui/sonner';
 
 const fontSans = FontSans({
 	subsets: ['latin'],
@@ -24,8 +25,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-	title: 'Investment',
-	description: 'A tool to help you manage your investments'
+	title: 'Saving calculator',
+	description: 'A tool to help you manage your savings, needs, and wants.'
 };
 
 export default function RootLayout({
@@ -44,9 +45,10 @@ export default function RootLayout({
 			enableSystem
 			disableTransitionOnChange
 		>
-			<main className={'max-w-5xl w-full mx-auto p-4 flex flex-col gap-6 lg:py-8'}>
+			<main className={'max-w-5xl w-full mx-auto p-4 flex flex-col gap-4 lg:py-8'}>
 				{children}
 			</main>
+			<Toaster position={'bottom-right'}/>
 		</ThemeProvider>
 		</body>
 		</html>
