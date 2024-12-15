@@ -62,6 +62,7 @@ export const useStore = create<State & Actions>()(
 		},
 		updateData: (type, id, value) => {
 			set((state) => {
+				value = Math.max(isNaN(value) ? 0 : value, 0);
 				state.rawData[type][id] = value;
 
 				const data = convertToSankey(state.rawData);

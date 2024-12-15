@@ -57,7 +57,7 @@ export function Table() {
 
 	if (Object.keys(savings).length === 0) return null;
 
-	return <Card>
+	return <Card className={'mt-8'}>
 		<CardHeader className={'relative'}>
 			<CardTitle>Summary</CardTitle>
 			<CardDescription>

@@ -15,6 +15,7 @@ import {useTheme} from 'next-themes';
 import Link from 'next/link';
 import Banner from '@/components/banners/banner';
 import {Table} from '@/components/table';
+import Image from 'next/image';
 
 const ThemeButton = dynamic(() => import('@/components/buttons/theme-button'), {ssr: false});
 
@@ -46,8 +47,13 @@ export default function Home() {
 
 	return <>
 		<div className={'flex justify-between gap-4 max-md:flex-col'}>
-			<div className={'flex flex-col'}>
-				<h1 className={'text-2xl font-bold'}>Saving calculator</h1>
+			<div className={'flex flex-col gap-1'}>
+				<div className={'flex items-center gap-2 justify-start'}>
+					<Image src={'/logo.svg'} alt={'logo'} className={'dark:border rounded-lg aspect-square'}
+						   width={28}
+						   height={28}/>
+					<h1 className={'text-2xl font-bold'}>Saving calculator</h1>
+				</div>
 				<p className={'text-muted-foreground'}>
 					Easily calculate your savings, needs, and wants. Made by <Link href={'https://mariusbrt.com'}
 																				   className={'underline font-semibold'}>Marius
@@ -110,9 +116,11 @@ export default function Home() {
 		{revenuesTotal > 0 && total > revenuesTotal && <Banner
             text={`You spend more than you earn (${numberParser(revenuesTotal - total)}€)`}/>}
 
-		<p>Your revenues are <span className={'font-semibold'}>{numberParser(revenuesTotal)}€</span>. You spend <span
-			className={'font-semibold'}>{numberParser(needsTotal)}€</span> ({percentages.needs}%) on your needs, <span
-			className={'font-semibold'}>{numberParser(wantsTotal)}€</span> ({percentages.wants}%) on your wants,
+		<p className={'pt-4'}>Your revenues are <span className={'font-semibold'}>{numberParser(revenuesTotal)}€</span>.
+			You spend <span
+				className={'font-semibold'}>{numberParser(needsTotal)}€</span> ({percentages.needs}%) on your
+			needs, <span
+				className={'font-semibold'}>{numberParser(wantsTotal)}€</span> ({percentages.wants}%) on your wants,
 			and <span className={'font-semibold'}>{numberParser(savingTotal)}€</span> ({percentages.savings}%) on your
 			savings.
 		</p>
@@ -122,8 +130,8 @@ export default function Home() {
                 <ResponsiveSankey
                     data={data}
                     margin={{top: 10, right: 0, bottom: 10, left: 0}}
-                    sort="auto"
-                    colors={{scheme: 'category10'}}
+                    sort="input"
+                    colors={{scheme: 'nivo'}}
                     nodeOpacity={1}
                     nodeHoverOthersOpacity={0.35}
                     nodeThickness={4}
@@ -140,7 +148,7 @@ export default function Home() {
 					}}
                     nodeBorderRadius={3}
                     enableLinkGradient
-                    linkOpacity={0.3}
+                    linkOpacity={theme === 'light' ? 0.7 : 0.4}
                     linkHoverOthersOpacity={0.1}
                     linkContract={3}
                     linkBlendMode="normal"

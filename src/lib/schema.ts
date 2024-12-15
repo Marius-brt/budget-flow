@@ -19,7 +19,6 @@ export const importSchema = z.object({
 
 type NodeType = {
 	id: string,
-	nodeColor: string,
 }
 
 type LinkType = {
@@ -42,18 +41,11 @@ const ids: Record<NodeId, string> = {
 	revenues: 'revenues'
 };
 
-const colors: Record<NodeId, string> = {
-	savings: 'blue',
-	needs: 'red',
-	wants: 'yellow',
-	revenues: 'green'
-};
-
 const defaultNodes: NodeType[] = [
-	{id: ids.revenues, nodeColor: colors.revenues},
-	{id: ids.needs, nodeColor: colors.needs},
-	{id: ids.wants, nodeColor: colors.wants},
-	{id: ids.savings, nodeColor: colors.savings}
+	{id: ids.revenues},
+	{id: ids.needs},
+	{id: ids.wants},
+	{id: ids.savings}
 ];
 
 export function checkData(data: any): z.infer<typeof importSchema> | null {
@@ -75,7 +67,7 @@ function convertToNodeAndLinks(type: NodeId, data: Record<string, number>): {
 	let total = 0;
 
 	Object.entries(data).forEach(([id, value]) => {
-		nodes.push({id, nodeColor: colors[type]});
+		nodes.push({id});
 		total += value;
 		if (type !== 'revenues') {
 			links.push({source: ids[type], target: id, value});
@@ -92,7 +84,7 @@ function generateSavingNodesAndLinks(id: string, source: string, percent: number
 	links: LinkType[]
 } {
 	const value = amount * percent / 100;
-	const nodes: NodeType[] = [{id, nodeColor: colors.savings}];
+	const nodes: NodeType[] = [{id}];
 	const links: LinkType[] = [{source: source, target: id, value}];
 
 	if (subCat.subCategories) {
