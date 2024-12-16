@@ -10,7 +10,7 @@ export function Footer() {
 				not be considered as financial advice.</p>
 		</div>
 		<p className={'text-muted-foreground'}>Source code available on <a
-			href={'https://github.com/Marius-brt/investment'} target={'_blank'}
+			href={'https://github.com/Marius-brt/budget-flow'} target={'_blank'}
 			className={'underline font-semibold'}>GitHub</a></p>
 	</footer>;
 }

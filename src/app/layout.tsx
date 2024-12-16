@@ -26,9 +26,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-	title: 'Saving calculator',
-	description: 'A tool to help you manage your savings, needs, and wants.',
-	keywords: ['savings', 'calculator', 'needs', 'wants', 'money', 'finance', 'tool']
+	title: 'Budget Flow',
+	description: 'A tool to manage budgets, plan investments, and visualize allocations.',
+	keywords: ['savings', 'calculator', 'needs', 'wants', 'money', 'finance', 'tool', 'budget', 'flow', 'sankey']
 };
 
 export default function RootLayout({
@@ -39,7 +39,7 @@ export default function RootLayout({
 		<body
 			className={`${fontSans.variable} ${fontMono.variable} bg-background font-sans antialiased`}
 		>
-		<Script defer data-domain="investment.mariusbrt.com"
+		<Script defer data-domain="budgetflow.mariusbrt.com"
 				src="https://plausible.mariusbrt.com/js/script.outbound-links.js"/>
 		<ThemeProvider
 			attribute="class"

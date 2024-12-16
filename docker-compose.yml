@@ -1,7 +1,7 @@
-name: investment
+name: budget-flow
 
 services:
-  next:
+  budget-flow:
     build:
       context: .
       dockerfile: Dockerfile

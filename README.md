@@ -4,10 +4,10 @@
     <img src="public/logo.svg" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">Saving calculator</h3>
+<h3 align="center">Budget Flow</h3>
 
   <p align="center">
-A tool for calculating your savings
+A tool to manage budgets, plan investments, and visualize allocations.
 <br />
     <a href="https://investment.mariusbrt.com/"><strong>Test it now »</strong></a>
     </p>
