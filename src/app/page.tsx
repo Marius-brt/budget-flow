@@ -56,7 +56,7 @@ export default function Home() {
 					<Image src={'/logo.svg'} alt={'logo'} className={'dark:border rounded-lg aspect-square'}
 						   width={28}
 						   height={28}/>
-					<h1 className={'text-2xl font-bold'}>Saving calculator</h1>
+					<h1 className={'text-2xl font-bold'}>Budget Flow</h1>
 				</div>
 				<p className={'text-muted-foreground'}>
 					Easily calculate your savings, needs, and wants. Made by <Link href={'https://mariusbrt.com'}
