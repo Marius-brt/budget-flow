@@ -9,7 +9,7 @@
   <p align="center">
 A tool for calculating your savings
 <br />
-    <a href="https://https://investment.mariusbrt.com/"><strong>Test it now »</strong></a>
+    <a href="https://investment.mariusbrt.com/"><strong>Test it now »</strong></a>
     </p>
 </div>
 
