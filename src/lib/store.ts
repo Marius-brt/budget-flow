@@ -32,13 +32,68 @@ const defaultState: State = {
 		savings: 'Savings',
 		needs: 'Needs',
 		wants: 'Wants',
-		revenues: 'Revenues'
+		revenues: 'Revenues',
+		salary: 'Salary',
+		rent: 'Rent',
+		food: 'Food',
+		electricity: 'Electricity',
+		subscriptions: 'Subscriptions',
+		transport: 'Transport',
+		sports: 'Sports',
+		bankbook: 'Bankbook',
+		etf: 'ETF',
+		crypto: 'Crypto',
+		's&p500': 'S&P 500',
+		'msciworld': 'MSCI World',
+		'bitcoin': 'Bitcoin',
+		'ethereum': 'Ethereum'
 	},
 	rawData: {
-		needs: {},
-		wants: {},
-		revenues: {},
-		savings: {}
+		needs: {
+			rent: 500,
+			food: 250,
+			electricity: 40,
+			transport: 50
+		},
+		wants: {
+			subscriptions: 20,
+			sports: 50
+		},
+		revenues: {
+			salary: 1600
+		},
+		savings: {
+			bankbook: {
+				percent: 20,
+				subCategories: {}
+			},
+			etf: {
+				percent: 60,
+				subCategories: {
+					's&p500': {
+						percent: 40,
+						subCategories: {}
+					},
+					'msciworld': {
+						percent: 60,
+						subCategories: {}
+					}
+				}
+			},
+			crypto: {
+				percent: 20,
+				subCategories: {
+					'bitcoin': {
+						percent: 50,
+						subCategories: {}
+					},
+					'ethereum': {
+						percent: 50,
+						subCategories: {}
+					}
+				}
+			}
+		}
 	},
 	revenuesTotal: 0,
 	needsTotal: 0,
