@@ -9,7 +9,7 @@
   <p align="center">
 A tool to manage budgets, plan investments, and visualize allocations.
 <br />
-    <a href="https://investment.mariusbrt.com/"><strong>Test it now »</strong></a>
+    <a href="https://budgetflow.mariusbrt.com/"><strong>Test it now »</strong></a>
     </p>
 </div>
 
